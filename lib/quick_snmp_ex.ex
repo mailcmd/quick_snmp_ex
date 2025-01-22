@@ -205,7 +205,7 @@ defmodule QuickSnmp do
         if oid2 == [] do 
             oid1 
         else
-            Enum.at(oid2, 0))
+            Enum.at(oid2, 0)
         end
     [ oid |  rest ] = String.split(oid, ".")
     case :ets.lookup(:snmp_mibs, oid) do
