@@ -10,8 +10,6 @@ defmodule QuickSnmp do
     - settings
 
   """
-  use Abn.Lib
-
   alias Log
   alias SNMP, as: SNMP_EX
 
