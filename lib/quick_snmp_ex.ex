@@ -33,13 +33,13 @@ defmodule QuickSnmp do
       alias QuickSnmp
       if (:ets.whereis(:snmp_mibs) == :undefined) do
 
-        case :ets.file2tab(~c"priv/mibs2elixir.ets") do
+        case :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"/mibs2elixir.ets") do
           {:error, :cannot_create_table } -> {:ok, :snmp_mibs }
           {:error, _} ->
             Log.log(:warning, "[SNMP]: File 'priv/mibs2elixir.ets' does not exists")
             try do
-              QuickSnmp.csv2ets("priv/mibs2elixir.csv")
-              :ets.file2tab(~c"priv/mibs2elixir.ets")
+              QuickSnmp.csv2ets(List.to_string(:code.priv_dir(:quick_snmp_ex)) ++ "priv/mibs2elixir.csv")
+              :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"priv/mibs2elixir.ets")
             rescue
               e -> raise("[SNMP]: File 'priv/mibs2elixir.csv' does not exists")
             end
