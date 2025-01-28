@@ -56,13 +56,13 @@ defmodule QuickSnmp do
   ###########################################################################
   ## Module API
 
-  # get2/5 wrap get/1
-  def get2(host, community, oids, timeout \\ 2500, max_repetitions \\ 2), do:
-    get(%Req{host: host, community: community, oids: oids, version: :v2, timeout: timeout, max_repetitions: max_repetitions})
-
   # get/5 wrap get/1
   def get(host, community, oids, timeout \\ 2500, max_repetitions \\ 2), do:
     get(%Req{host: host, community: community, oids: oids, timeout: timeout, max_repetitions: max_repetitions})
+
+  # get2/5 wrap get2/1
+  def get2(host, community, oids, timeout \\ 2500, max_repetitions \\ 2), do:
+  get(%Req{host: host, community: community, oids: oids, version: :v2, timeout: timeout, max_repetitions: max_repetitions})
 
   # get/1
   def get(%Req{oids: oids} = request) when not is_list(oids), do:
@@ -89,7 +89,7 @@ defmodule QuickSnmp do
               Map.put(acc, oid, value)
           else
               Map.put(acc, list_oid_to_string(oid), value)
-          end          
+          end
         end)
       respose ->
         Log.log(:warning, "[SNMP]: Unknown response to request: #{inspect(respose)}")
@@ -98,6 +98,52 @@ defmodule QuickSnmp do
   end
   # get/1 - error
   def get(prms), do:
+    Log.log(:error, "[SNMP]: SNMP Request missing mandatory pararemeter: #{inspect(prms)}")
+
+
+  ###########################################################################3
+  # set/5 wrap set/1
+  def set(host, community, oids, timeout \\ 2500, max_repetitions \\ 2), do:
+    set(%Req{host: host, community: community, oids: oids, timeout: timeout, max_repetitions: max_repetitions})
+
+  # set2/5 wrap set2/1
+  def set2(host, community, oids, timeout \\ 2500, max_repetitions \\ 2), do:
+    set(%Req{host: host, community: community, oids: oids, version: :v2, timeout: timeout, max_repetitions: max_repetitions})
+
+  # set/1
+  def set(%Req{oids: oids} = request) when not is_list(oids), do:
+    set(%{request | oids: [oids]})
+  # set/1 - main
+  def set(%Req{host: host, community: community, oids: oids} = request) do
+    uri = URI.parse("snmp://#{host}:#{request.port}")
+    credential = SNMP_EX.credential(%{version: request.version, community: community})
+    varbinds = oids |> Enum.reduce([], fn ({oid, type, value}, var) ->
+      parsed_oid = parse_oid(oid)
+      [ %{oid: parsed_oid, type: type, value: value} | var ]
+    end)
+
+    case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}) do
+      {:error, :etimedout } -> :timeout
+      {:error, _ } -> nil
+      {:ok, result } when length(result) == 1 and request.type == :set ->
+        [%{oid: _, value: value}] = result
+        value
+      {:ok, result } ->
+        result |> Enum.reduce(%{}, fn (res, acc) ->
+          %{oid: oid, value: value} = res
+          if settings(:numeric_return) do
+              Map.put(acc, oid, value)
+          else
+              Map.put(acc, list_oid_to_string(oid), value)
+          end
+        end)
+      respose ->
+        Log.log(:warning, "[SNMP]: Unknown response to request: #{inspect(respose)}")
+        nil
+      end
+  end
+  # set/1 - error
+  def set(prms), do:
     Log.log(:error, "[SNMP]: SNMP Request missing mandatory pararemeter: #{inspect(prms)}")
 
   ###########################################################################3
@@ -155,7 +201,7 @@ defmodule QuickSnmp do
                 Map.put(acc, oid, value)
             else
                 Map.put(acc, list_oid_to_string(oid), value)
-            end            
+            end
           end)
         rescue
           _ -> :timeout
@@ -199,9 +245,9 @@ defmodule QuickSnmp do
 
   def string_oid_to_list(oid) do
     [ oid1 |  oid2 ] = String.split(oid, "::")
-    oid = 
-        if oid2 == [] do 
-            oid1 
+    oid =
+        if oid2 == [] do
+            oid1
         else
             Enum.at(oid2, 0)
         end
