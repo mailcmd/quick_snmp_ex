@@ -30,7 +30,7 @@ defmodule QuickSnmp do
 
   defmacro __using__(_) do
     quote do
-      alias QuickSnmp
+      alias QuickSnmp, as: QSNMP
       if (:ets.whereis(:snmp_mibs) == :undefined) do
 
         case :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"/mibs2elixir.ets") do
