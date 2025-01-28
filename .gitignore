@@ -21,3 +21,5 @@ quick_snmp_ex-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+/priv/snmp/
