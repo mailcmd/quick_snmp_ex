@@ -49,7 +49,7 @@ defmodule QuickSnmp do
 
       end
       Process.put(:numeric_return, false)
-      options |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
+      unquote(options) |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
       true
     end
   end
