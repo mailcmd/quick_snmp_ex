@@ -1,5 +1,5 @@
 %{
   "log_ex": {:git, "https://github.com/mailcmd/log_ex.git", "593d11733223e46494785a11c06a1e5906c299d0", []},
   "netaddr_ex": {:hex, :netaddr_ex, "1.3.1", "ce5e8ebdf3ade9fb42a07e910a43a2f607c48bc5401f071772364f61263fc328", [:mix], [], "hexpm", "cae2d1deccc0becb31c8a5dcbf7010cc598a35eb0ff61689995dfbe7cda74224"},
-  "snmp_ex": {:git, "https://github.com/mailcmd/snmp-elixir.git", "d57b49f3a25c684dcab6c273100b37a35490f8fa", []},
+  "snmp_ex": {:git, "https://github.com/mailcmd/snmp-elixir.git", "1ff3555563e33fae882620cf2b17f9ca9ad645e5", []},
 }

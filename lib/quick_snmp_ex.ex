@@ -79,7 +79,7 @@ defmodule QuickSnmp do
       [ %{oid: parsed_oid, type: request.type || :get} ] ++ var
     end)
 
-    case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}) do
+    case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}, [timeout: request.timeout]) do
       {:error, :etimedout } ->
         get(%Req{request | max_repetitions: request.max_repetitions - 1})
       {:error, _ } ->
@@ -130,7 +130,7 @@ defmodule QuickSnmp do
       [ %{oid: parsed_oid, type: type, value: value} | var ]
     end)
 
-    case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}) do
+    case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}, [timeout: request.timeout]) do
       {:error, :etimedout } ->
         set(%Req{request | max_repetitions: request.max_repetitions - 1})
       {:error, _ } ->
