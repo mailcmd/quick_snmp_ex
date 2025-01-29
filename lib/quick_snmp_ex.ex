@@ -60,14 +60,17 @@ defmodule QuickSnmp do
   def get(host, community, oids, timeout \\ 2500, max_repetitions \\ 2), do:
     get(%Req{host: host, community: community, oids: oids, timeout: timeout, max_repetitions: max_repetitions})
 
-  # get2/5 wrap get2/1
+  # get2/5 wrap get/1
   def get2(host, community, oids, timeout \\ 2500, max_repetitions \\ 2), do:
-  get(%Req{host: host, community: community, oids: oids, version: :v2, timeout: timeout, max_repetitions: max_repetitions})
+    get(%Req{host: host, community: community, oids: oids, version: :v2, timeout: timeout, max_repetitions: max_repetitions})
 
   # get/1
+  def get(%Req{max_repetitions: max_repetitions}) when max_repetitions == 0, do: :timeout
   def get(%Req{oids: oids} = request) when not is_list(oids), do:
     get(%{request | oids: [oids]})
-  # get/1 - main
+
+  ###############
+  ### get/1 - MAIN
   def get(%Req{host: host, community: community, oids: oids} = request) do
     uri = URI.parse("snmp://#{host}:#{request.port}")
     credential = SNMP_EX.credential(%{version: request.version, community: community})
@@ -77,8 +80,10 @@ defmodule QuickSnmp do
     end)
 
     case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}) do
-      {:error, :etimedout } -> :timeout
-      {:error, _ } -> nil
+      {:error, :etimedout } ->
+        get(%Req{request | max_repetitions: request.max_repetitions - 1})
+      {:error, _ } ->
+        nil
       {:ok, result } when length(result) == 1 and request.type == :get ->
         [%{oid: _, value: value}] = result
         value
@@ -111,9 +116,12 @@ defmodule QuickSnmp do
     set(%Req{host: host, community: community, oids: oids, version: :v2, timeout: timeout, max_repetitions: max_repetitions})
 
   # set/1
+  def set(%Req{max_repetitions: max_repetitions}) when max_repetitions == 0, do: :timeout
   def set(%Req{oids: oids} = request) when not is_list(oids), do:
     set(%{request | oids: [oids]})
-  # set/1 - main
+
+  ###############
+  ### set/1 - MAIN
   def set(%Req{host: host, community: community, oids: oids} = request) do
     uri = URI.parse("snmp://#{host}:#{request.port}")
     credential = SNMP_EX.credential(%{version: request.version, community: community})
@@ -123,8 +131,10 @@ defmodule QuickSnmp do
     end)
 
     case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}) do
-      {:error, :etimedout } -> :timeout
-      {:error, _ } -> nil
+      {:error, :etimedout } ->
+        set(%Req{request | max_repetitions: request.max_repetitions - 1})
+      {:error, _ } ->
+        nil
       {:ok, result } when length(result) == 1 and request.type == :set ->
         [%{oid: _, value: value}] = result
         value
@@ -208,6 +218,10 @@ defmodule QuickSnmp do
         end
     end
   end
+
+  def version_to_atom(version) when is_integer(version), do: String.to_atom("v" <> Integer.to_string(version))
+  def version_to_atom(version) when is_atom(version), do: version
+  def version_to_atom(_), do: :v1
 
   ###########################################################################3
   # Accesories
