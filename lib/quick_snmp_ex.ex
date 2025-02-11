@@ -61,7 +61,7 @@ defmodule QuickSnmp do
               QuickSnmp.csv2ets(List.to_string(:code.priv_dir(:quick_snmp_ex)) ++ "priv/mibs2elixir.csv")
               :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"priv/mibs2elixir.ets")
             rescue
-              e -> raise("[SNMP]: File 'priv/mibs2elixir.csv' does not exists")
+              e -> raise("[SNMP]: File 'priv/mibs2elixir.csv' does not exists #{inspect e}")
             end
           result ->
             result
