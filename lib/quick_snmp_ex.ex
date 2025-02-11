@@ -21,9 +21,9 @@ defmodule QuickSnmp do
   This library support only version 1 and 2 of SNMP protocol.
 
   """
-  
+
   use Application
-  
+
   alias Log
   alias SNMP, as: SNMP_EX
 
@@ -67,7 +67,7 @@ defmodule QuickSnmp do
           result ->
             result
         end
-      end 
+      end
     {:ok, self()}
   end
 
@@ -145,7 +145,7 @@ defmodule QuickSnmp do
     credential = SNMP_EX.credential(%{version: request.version, community: community})
     varbinds = oids |> Enum.reduce([], fn (%{oid: oid, type: type, value: value}, var) ->
       parsed_oid = parse_oid(oid)
-      [ %{oid: parsed_oid, type: type, value: value} | var ]
+      var ++ [ %{oid: parsed_oid, type: type, value: value} ]
     end)
 
     case SNMP_EX.request(%{uri: uri, credential: credential, varbinds: varbinds}, [timeout: request.timeout]) do
