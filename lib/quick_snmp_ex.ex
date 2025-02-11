@@ -1,15 +1,29 @@
 defmodule QuickSnmp do
   @moduledoc """
-  Para utilizar el módulo:
+  For using on a module just add:
     use QuickSnmp
 
-  Funciones disponibles:
-    - get
-    - getnext
-    - walk
+  Functions availables:
+    - get/5
+    - get2/5
+    - get/1
+    - set/5
+    - set2/5
+    - set/1
+    - getnext/5
+    - getnext2/5
+    - getnext/1
+    - walk/5
+    - walk2/5
+    - walk/1
     - settings
 
+  This library support only version 1 and 2 of SNMP protocol.
+
   """
+  
+  use Application
+  
   alias Log
   alias SNMP, as: SNMP_EX
 
@@ -31,8 +45,14 @@ defmodule QuickSnmp do
   defmacro __using__(options \\ []) do
     quote do
       alias QuickSnmp, as: QSNMP
-      if (:ets.whereis(:snmp_mibs) == :undefined) do
+      Process.put(:numeric_return, false)
+      unquote(options) |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
+      true
+    end
+  end
 
+  def start(_) do
+      if (:ets.whereis(:snmp_mibs) == :undefined) do
         case :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"/mibs2elixir.ets") do
           {:error, :cannot_create_table } -> {:ok, :snmp_mibs }
           {:error, _} ->
@@ -46,12 +66,7 @@ defmodule QuickSnmp do
           result ->
             result
         end
-
-      end
-      Process.put(:numeric_return, false)
-      unquote(options) |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
-      true
-    end
+      end 
   end
 
   ###########################################################################
@@ -205,7 +220,7 @@ defmodule QuickSnmp do
     case walk_result do
       [] -> nil
       result ->
-#        try do
+        try do
           result |> Enum.reduce(%{}, fn (res, acc) ->
             %{oid: oid, value: value} = res
             if settings(:numeric_return) do
@@ -214,9 +229,9 @@ defmodule QuickSnmp do
                 Map.put(acc, list_oid_to_string(oid), value)
             end
           end)
-#        rescue
-#          _ -> :timeout
-#        end
+        rescue
+          _ -> :timeout
+        end
     end
   end
 
