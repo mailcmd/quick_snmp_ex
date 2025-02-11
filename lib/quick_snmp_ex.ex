@@ -205,7 +205,7 @@ defmodule QuickSnmp do
     case walk_result do
       [] -> nil
       result ->
-        try do
+#        try do
           result |> Enum.reduce(%{}, fn (res, acc) ->
             %{oid: oid, value: value} = res
             if settings(:numeric_return) do
@@ -214,9 +214,9 @@ defmodule QuickSnmp do
                 Map.put(acc, list_oid_to_string(oid), value)
             end
           end)
-        rescue
-          _ -> :timeout
-        end
+#        rescue
+#          _ -> :timeout
+#        end
     end
   end
 
