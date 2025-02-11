@@ -14,7 +14,7 @@ defmodule QuickSnmpEx.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, QuickSnmp ]
+      extra_applications: [:logger, :quick_snmp ]
     ]
   end
 
