@@ -183,7 +183,6 @@ defmodule QuickSnmp do
   def walk(%Req{oids: oids} = request) when not is_list(oids), do:
     walk(%{request | oids: [oids]})
   def walk(%Req{host: host, community: community, oids: oids} = request) do
-    IO.inspect request
     uri = URI.parse("snmp://#{host}:#{request.port}")
     credential = SNMP_EX.credential(%{version: request.version, community: community})
 
