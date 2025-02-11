@@ -51,7 +51,7 @@ defmodule QuickSnmp do
     end
   end
 
-  def start(_, _) do
+  def start do
       if (:ets.whereis(:snmp_mibs) == :undefined) do
         case :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"/mibs2elixir.ets") do
           {:error, :cannot_create_table } -> {:ok, :snmp_mibs }
