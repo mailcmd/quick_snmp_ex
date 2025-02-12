@@ -251,16 +251,18 @@ defmodule QuickSnmp do
     - :numeric_return -> true | false
     - ...
   """
-  def settings(key, value), do: :ets.insert(:snmp_mibs, {key, value})
-  # Process.put(key, value)
+  def settings(key, value) do
+    :ets.insert(:snmp_mibs, {key, value})
+    IO.inspect settings(key)
+  end
+
   def settings(key) do
     case :ets.lookup(:snmp_mibs, key) do
-      [] -> false
-      [{_, value}] ->
-        value
+      [{_, value}] -> value
+      _ -> false
     end
   end
-  # Process.get(key)
+
 
 
 
