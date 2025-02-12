@@ -42,7 +42,7 @@ defmodule QuickSnmp do
     ]
   end
 
-  defmacro __using__(options \\ []) do
+  defmacro __using__(_options \\ []) do
     quote do
       alias QuickSnmp, as: QSNMP
       true
@@ -68,6 +68,7 @@ defmodule QuickSnmp do
     end
     :ets.insert(:snmp_mibs, {:numeric_return, false})
     # @options |> IO.inspect |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
+    {:ok, self()}
   end
 
   ###########################################################################
