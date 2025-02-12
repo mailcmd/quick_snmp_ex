@@ -44,33 +44,34 @@ defmodule QuickSnmp do
 
   defmacro __using__(options \\ []) do
     quote do
+      @options unquote(options)
       alias QuickSnmp, as: QSNMP
-      if (:ets.whereis(:snmp_mibs) == :undefined) do
-        QuickSnmp.start()
-      end
-      :ets.insert(:snmp_mibs, {:numeric_return, false})
-      unquote(options) |> IO.inspect |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
+
+      # :ets.insert(:snmp_mibs, {:numeric_return, false})
+      # unquote(options) |> IO.inspect |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
       true
     end
   end
 
   def start, do: start(:ok, [])
   def start(_, _) do
-      if (:ets.whereis(:snmp_mibs) == :undefined) do
-        case :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"/mibs2elixir.ets") do
-          {:error, :cannot_create_table } -> {:ok, :snmp_mibs }
-          {:error, _} ->
-            Log.log(:warning, "[SNMP]: File 'priv/mibs2elixir.ets' does not exists")
-            try do
-              QuickSnmp.csv2ets(List.to_string(:code.priv_dir(:quick_snmp_ex)) ++ "priv/mibs2elixir.csv")
-              :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"priv/mibs2elixir.ets")
-            rescue
-              e -> raise("[SNMP]: File 'priv/mibs2elixir.csv' does not exists #{inspect e}")
-            end
-          result ->
-            result
-        end
+    if (:ets.whereis(:snmp_mibs) == :undefined) do
+      case :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"/mibs2elixir.ets") do
+        {:error, :cannot_create_table } -> {:ok, :snmp_mibs }
+        {:error, _} ->
+          Log.log(:warning, "[SNMP]: File 'priv/mibs2elixir.ets' does not exists")
+          try do
+            QuickSnmp.csv2ets(List.to_string(:code.priv_dir(:quick_snmp_ex)) ++ "priv/mibs2elixir.csv")
+            :ets.file2tab(:code.priv_dir(:quick_snmp_ex) ++ ~c"priv/mibs2elixir.ets")
+          rescue
+            e -> raise("[SNMP]: File 'priv/mibs2elixir.csv' does not exists #{inspect e}")
+          end
+        result ->
+          result
       end
+    end
+    :ets.insert(:snmp_mibs, {:numeric_return, false})
+    @options |> IO.inspect |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
     {:ok, self()}
   end
 
@@ -253,7 +254,6 @@ defmodule QuickSnmp do
   """
   def settings(key, value) do
     :ets.insert(:snmp_mibs, {key, value})
-    IO.inspect settings(key)
   end
 
   def settings(key) do
