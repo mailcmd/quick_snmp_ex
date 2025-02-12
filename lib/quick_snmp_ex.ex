@@ -45,7 +45,8 @@ defmodule QuickSnmp do
   defmacro __using__(options \\ []) do
     quote do
       alias QuickSnmp, as: QSNMP
-      Process.put(:numeric_return, false)
+      # Process.put(:numeric_return, false)
+      :ets.insert(:snmp_mibs, {:numeric_return, false})
       unquote(options) |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
       true
     end
@@ -248,8 +249,16 @@ defmodule QuickSnmp do
     - :numeric_return -> true | false
     - ...
   """
-  def settings(key, value), do: Process.put(key, value)
-  def settings(key), do: Process.get(key)
+  def settings(key, value), do: :ets.insert(:snmp_mibs, {key, value})
+  # Process.put(key, value)
+  def settings(key) do
+    case :ets.lookup(:snmp_mibs, key) do
+      [] -> false
+      [{_, value}] ->
+        value
+    end
+  end
+  # Process.get(key)
 
 
 
