@@ -67,7 +67,6 @@ defmodule QuickSnmp do
       end
     end
     :ets.insert(:snmp_mibs, {:numeric_return, false})
-    # @options |> IO.inspect |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
     {:ok, self()}
   end
 
