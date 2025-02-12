@@ -46,10 +46,10 @@ defmodule QuickSnmp do
     quote do
       alias QuickSnmp, as: QSNMP
       if (:ets.whereis(:snmp_mibs) == :undefined) do
-        apply(QuickSnmp, :start, [])
+        QuickSnmp.start()
       end
       :ets.insert(:snmp_mibs, {:numeric_return, false})
-      unquote(options) |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
+      unquote(options) |> IO.inspect |> Enum.each( fn {k, v} -> QuickSnmp.settings(k, v) end)
       true
     end
   end
